@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppTheme {
   static ThemeData lovelyTheme = ThemeData(
     scaffoldBackgroundColor: const Color(0xFFFFF0F5), // 연한 핑크
-    primaryColor: const Color(0xFFFFC0CB),            // 메인 핑크
+    primaryColor: const Color(0xFFFFC0CB), // 메인 핑크
     fontFamily: 'Arial',
     textTheme: const TextTheme(
       titleLarge: TextStyle(
@@ -12,7 +12,8 @@ class AppTheme {
         color: Color(0xFF333333),
       ),
       bodyLarge: TextStyle(
-        fontSize: 16,
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
         color: Color(0xFF555555),
       ),
       bodyMedium: TextStyle(

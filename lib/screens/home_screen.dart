@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:lovely_shop_app/models/admob_banner.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../models/product.dart';
 import '../widgets/product_card.dart';
 import '../providers/product_provider.dart';
+import '../providers/cart_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,12 +15,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Product? selectedProduct;
-
   void selectProduct(Product product) {
-    setState(() {
-      selectedProduct = product;
-    });
+    Navigator.pushNamed(
+      context,
+      '/productDetail',
+      arguments: product,
+    );
   }
 
   @override
@@ -25,62 +28,200 @@ class _HomeScreenState extends State<HomeScreen> {
     final products = context.watch<ProductProvider>().products;
 
     return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Lovely Shop')),
-        body: Row(
-          children: [
-            // 왼쪽 상품 목록
-            Expanded(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: products.isEmpty
-                        ? const Center(child: Text('상품이 없습니다.'))
-                        : ListView.builder(
-                            itemCount: products.length,
-                            itemBuilder: (context, index) {
-                              return ProductCard(
-                                product: products[index],
-                                onTap: () => selectProduct(products[index]),
-                              );
-                            },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Lovely Shop'),
+            actions: [
+              Consumer<CartProvider>(
+                builder: (ctx, cart, child) => Stack(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.shopping_cart),
+                      onPressed: () => Navigator.pushNamed(context, '/cart'),
+                    ),
+                    if (cart.itemCount > 0)
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                  ),
-                ],
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            '${cart.itemCount}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
-
-            // 오른쪽 선택된 상품 표시 영역
-            Expanded(
-              child: selectedProduct == null
-                  ? const Center(child: Text('선택된 상품이 없습니다.'))
-                  : Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+            ],
+          ),
+          body: Column(
+            children: [
+              const AdmobBanner(),
+              Expanded(
+                child: products.isEmpty
+                    ? const Center(child: Text('상품이 없습니다.'))
+                    : Column(
                         children: [
-                          Text(
-                            selectedProduct!.name,
-                            style: Theme.of(context).textTheme.headlineSmall,
+                          // 최근 상품 (첫 번째 상품을 최신으로 가정)
+                          if (products.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: GestureDetector(
+                                onTap: () => selectProduct(products.first),
+                                child: AspectRatio(
+                                  aspectRatio: 1.0, // 1:1 비율
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.3),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        // 배경 이미지
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          child: Image.network(
+                                            products.first.imageUrl,
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        // 그라데이션 오버레이
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topCenter,
+                                              end: Alignment.bottomCenter,
+                                              colors: [
+                                                Colors.transparent,
+                                                Colors.black.withOpacity(0.3),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        // 좌측 하단 텍스트 정보
+                                        Positioned(
+                                          left: 16,
+                                          bottom: 16,
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                products.first.name,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  shadows: [
+                                                    Shadow(
+                                                      offset: Offset(1, 1),
+                                                      blurRadius: 3,
+                                                      color: Colors.black54,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                products.first.description,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 14,
+                                                  shadows: [
+                                                    Shadow(
+                                                      offset: Offset(1, 1),
+                                                      blurRadius: 3,
+                                                      color: Colors.black54,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                '${NumberFormat('#,###').format(products.first.price)}원',
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                  shadows: [
+                                                    Shadow(
+                                                      offset: Offset(1, 1),
+                                                      blurRadius: 3,
+                                                      color: Colors.black54,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          // 상품 목록
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: products.length,
+                              itemBuilder: (context, index) {
+                                return ProductCard(
+                                  product: products[index],
+                                  onTap: () => selectProduct(products[index]),
+                                  onEdit: () => Navigator.pushNamed(
+                                    context,
+                                    '/addProduct',
+                                    arguments: products[index],
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                          const SizedBox(height: 12),
-                          Text('${selectedProduct!.price}원'),
-                          const SizedBox(height: 12),
-                          Image.network(
-                            selectedProduct!.imageUrl,
-                            height: 150,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(selectedProduct!.description),
                         ],
                       ),
-                    ),
+              ),
+            ],
+          ),
+          floatingActionButton: SizedBox(
+            // 버튼 사이즈 키움
+            width: 60,
+            height: 60,
+            child: FloatingActionButton(
+              onPressed: () => Navigator.pushNamed(context, '/addProduct'),
+              child: const Icon(
+                Icons.add,
+                size: 40,
+              ),
             ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => Navigator.pushNamed(context, '/addProduct'),
-          child: const Icon(Icons.add),
+          ),
         ),
       ),
     );

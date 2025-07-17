@@ -5,8 +5,10 @@ import '../models/product.dart';
 class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback onTap;
+  final VoidCallback? onEdit;
 
-  const ProductCard({super.key, required this.product, required this.onTap});
+  const ProductCard(
+      {super.key, required this.product, required this.onTap, this.onEdit});
 
   String formatPrice(int price) {
     if (price == 0) return '무료';
@@ -25,7 +27,7 @@ class ProductCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.2),
+                color: Colors.grey.withAlpha(20),
                 blurRadius: 5,
                 offset: const Offset(0, 3),
               ),
@@ -34,16 +36,19 @@ class ProductCard extends StatelessWidget {
           child: Row(
             children: [
               // 상품 이미지
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: SizedBox(
-                  width: 100, // 원하는 크기 지정
-                  height: 100,
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Image.network(
-                      product.imageUrl,
-                      fit: BoxFit.cover,
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox(
+                    width: 100, // 원하는 크기 지정
+                    height: 100,
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: Image.network(
+                        product.imageUrl,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
@@ -56,16 +61,35 @@ class ProductCard extends StatelessWidget {
                   children: [
                     Text(
                       product.name,
-                      style: Theme.of(context).textTheme.titleMedium,
+                      style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      formatPrice(product.price),
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          Spacer(),
+                          Text(
+                            formatPrice(product.price),
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ],
+                      ),
+                    )
                   ],
                 ),
               ),
+              // 수정 버튼
+              if (onEdit != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: IconButton(
+                    onPressed: onEdit,
+                    icon: const Icon(Icons.edit),
+                    iconSize: 20,
+                    color: Colors.blue,
+                  ),
+                ),
             ],
           ),
         ),

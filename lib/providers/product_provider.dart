@@ -1,28 +1,48 @@
 import 'package:flutter/material.dart';
 import '../models/product.dart';
+import '../services/storage_service.dart';
 
 class ProductProvider with ChangeNotifier {
-  final List<Product> _products = [
-    Product(
-      id: '1',
-      name: '리본 티셔츠',
-      price: 16000,
-      description: '사랑스러운 리본 티셔츠입니다.',
-      imageUrl: 'https://picsum.photos/200/300?1',
-    ),
-    Product(
-      id: '2',
-      name: '플라워 원피스',
-      price: 32000,
-      description: '화사한 플라워 패턴의 원피스입니다.',
-      imageUrl: 'https://picsum.photos/200/300?2',
-    ),
-  ];
+  final List<Product> _products = [];
+  final StorageService _storageService = StorageService();
+  bool _isLoaded = false;
 
   List<Product> get products => List.unmodifiable(_products); // 읽기 전용
 
-  void addProduct(Product product) {
-    _products.add(product);
+  // 앱 시작시 저장된 상품들을 로드
+  Future<void> loadProducts() async {
+    if (_isLoaded) return; // 이미 로드된 경우 중복 로드 방지
+
+    try {
+      final loadedProducts = await _storageService.loadProducts();
+      _products.clear();
+      _products.addAll(loadedProducts);
+      _isLoaded = true;
+      notifyListeners();
+    } catch (e) {
+      print('상품 로드 실패: $e');
+    }
+  }
+
+  Future<void> addProduct(Product product) async {
+    _products.insert(0, product); // 맨 앞에 추가하여 최신 상품이 첫 번째가 되도록
+    await _storageService.saveProducts(_products);
     notifyListeners(); // UI에 변경 알림
+  }
+
+  Future<void> updateProduct(Product updatedProduct) async {
+    final index =
+        _products.indexWhere((product) => product.id == updatedProduct.id);
+    if (index >= 0) {
+      _products[index] = updatedProduct;
+      await _storageService.saveProducts(_products);
+      notifyListeners();
+    }
+  }
+
+  Future<void> removeProduct(String id) async {
+    _products.removeWhere((product) => product.id == id);
+    await _storageService.saveProducts(_products);
+    notifyListeners();
   }
 }
