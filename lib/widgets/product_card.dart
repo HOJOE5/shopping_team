@@ -25,7 +25,7 @@ class ProductCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.2),
+                color: Colors.grey.withAlpha(20),
                 blurRadius: 5,
                 offset: const Offset(0, 3),
               ),
@@ -34,16 +34,19 @@ class ProductCard extends StatelessWidget {
           child: Row(
             children: [
               // 상품 이미지
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: SizedBox(
-                  width: 100, // 원하는 크기 지정
-                  height: 100,
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Image.network(
-                      product.imageUrl,
-                      fit: BoxFit.cover,
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox(
+                    width: 100, // 원하는 크기 지정
+                    height: 100,
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: Image.network(
+                        product.imageUrl,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
@@ -56,13 +59,21 @@ class ProductCard extends StatelessWidget {
                   children: [
                     Text(
                       product.name,
-                      style: Theme.of(context).textTheme.titleMedium,
+                      style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      formatPrice(product.price),
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          Spacer(),
+                          Text(
+                            formatPrice(product.price),
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ],
+                      ),
+                    )
                   ],
                 ),
               ),

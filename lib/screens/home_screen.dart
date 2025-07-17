@@ -25,22 +25,32 @@ class _HomeScreenState extends State<HomeScreen> {
     final products = context.watch<ProductProvider>().products;
 
     return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Lovely Shop')),
-        body: products.isEmpty
-            ? const Center(child: Text('상품이 없습니다.'))
-            : ListView.builder(
-                itemCount: products.length,
-                itemBuilder: (context, index) {
-                  return ProductCard(
-                    product: products[index],
-                    onTap: () => selectProduct(products[index]),
-                  );
-                },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        child: Scaffold(
+          appBar: AppBar(title: const Text('Lovely Shop')),
+          body: products.isEmpty
+              ? const Center(child: Text('상품이 없습니다.'))
+              : ListView.builder(
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    return ProductCard(
+                      product: products[index],
+                      onTap: () => selectProduct(products[index]),
+                    );
+                  },
+                ),
+          floatingActionButton: SizedBox(
+            width: 60,
+            height: 60,
+            child: FloatingActionButton(
+              onPressed: () => Navigator.pushNamed(context, '/addProduct'),
+              child: const Icon(
+                Icons.add,
+                size: 40,
               ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => Navigator.pushNamed(context, '/addProduct'),
-          child: const Icon(Icons.add),
+            ),
+          ),
         ),
       ),
     );
