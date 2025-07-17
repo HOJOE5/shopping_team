@@ -25,7 +25,7 @@ class ProductProvider with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
-    _products.add(product);
+    _products.insert(0, product); // 맨 앞에 추가하여 최신 상품이 첫 번째가 되도록
     await _storageService.saveProducts(_products);
     notifyListeners(); // UI에 변경 알림
   }

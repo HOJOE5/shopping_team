@@ -7,8 +7,12 @@ import 'screens/product_detail_screen.dart';
 import 'screens/add_product_screen.dart';
 import 'screens/cart_screen.dart';
 import 'theme/app_theme.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
+
   runApp(
     MultiProvider(
       providers: [

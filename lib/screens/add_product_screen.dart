@@ -36,6 +36,52 @@ class _AddProductScreenState extends State<AddProductScreen> {
     }
   }
 
+  void _showDeleteDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('상품 삭제'),
+        content:
+            Text('${existingProduct!.name}을 정말 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop(); // 다이얼로그 닫기
+              await Provider.of<ProductProvider>(context, listen: false)
+                  .removeProduct(existingProduct!.id);
+              if (mounted) {
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text('삭제 완료'),
+                    content: const Text('상품이 삭제되었습니다.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // 다이얼로그 닫기
+                          Navigator.of(context).pop(); // 홈화면으로 이동
+                        },
+                        child: const Text('확인'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('삭제'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       if (imageUrl == null || imageUrl!.isEmpty) {
@@ -115,6 +161,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.of(context).pop(),
           ),
+          actions: [
+            if (isEditMode)
+              IconButton(
+                icon: const Icon(Icons.delete),
+                color: Colors.red,
+                onPressed: _showDeleteDialog,
+              ),
+          ],
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
