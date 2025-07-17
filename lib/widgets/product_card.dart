@@ -5,8 +5,10 @@ import '../models/product.dart';
 class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback onTap;
+  final VoidCallback? onEdit;
 
-  const ProductCard({super.key, required this.product, required this.onTap});
+  const ProductCard(
+      {super.key, required this.product, required this.onTap, this.onEdit});
 
   String formatPrice(int price) {
     if (price == 0) return '무료';
@@ -77,6 +79,17 @@ class ProductCard extends StatelessWidget {
                   ],
                 ),
               ),
+              // 수정 버튼
+              if (onEdit != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: IconButton(
+                    onPressed: onEdit,
+                    icon: const Icon(Icons.edit),
+                    iconSize: 20,
+                    color: Colors.blue,
+                  ),
+                ),
             ],
           ),
         ),
