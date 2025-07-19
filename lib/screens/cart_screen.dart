@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/cart_provider.dart';
+import '../utils/image_utils.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -81,11 +82,13 @@ class CartScreen extends StatelessWidget {
                             child: ListTile(
                               leading: ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  cartItem.product.imageUrl,
+                                child: SizedBox(
                                   width: 60,
                                   height: 60,
-                                  fit: BoxFit.cover,
+                                  child: ImageUtils.buildImage(
+                                    cartItem.product.imageUrl,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
                               title: Text(cartItem.product.name),

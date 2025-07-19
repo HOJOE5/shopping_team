@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/product.dart';
+import '../utils/image_utils.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -45,10 +46,7 @@ class ProductCard extends StatelessWidget {
                     height: 100,
                     child: AspectRatio(
                       aspectRatio: 1,
-                      child: Image.network(
-                        product.imageUrl,
-                        fit: BoxFit.cover,
-                      ),
+                      child: ImageUtils.buildImage(product.imageUrl),
                     ),
                   ),
                 ),

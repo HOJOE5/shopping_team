@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lovely_shop_app/providers/product_provider.dart';
 import 'package:lovely_shop_app/providers/cart_provider.dart';
+import 'package:lovely_shop_app/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'screens/home_screen.dart';
+import 'screens/login_screen.dart';
 import 'screens/product_detail_screen.dart';
 import 'screens/add_product_screen.dart';
 import 'screens/cart_screen.dart';
@@ -16,6 +18,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(
             create: (_) => ProductProvider()..loadProducts()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
@@ -34,9 +37,16 @@ class LovelyShopApp extends StatelessWidget {
       title: 'Lovely Shop',
       theme: AppTheme.lovelyTheme,
       debugShowCheckedModeBanner: false,
-      initialRoute: '/',
+      home: Consumer<AuthProvider>(
+        builder: (context, authProvider, child) {
+          return authProvider.isLoggedIn
+              ? const HomeScreen()
+              : const LoginScreen();
+        },
+      ),
       routes: {
-        '/': (context) => const HomeScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/home': (context) => const HomeScreen(),
         '/productDetail': (context) => const ProductDetailScreen(),
         '/addProduct': (context) => const AddProductScreen(),
         '/cart': (context) => const CartScreen(),
