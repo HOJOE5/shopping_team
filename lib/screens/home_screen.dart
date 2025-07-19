@@ -7,6 +7,7 @@ import '../widgets/product_card.dart';
 import '../providers/product_provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/auth_provider.dart';
+import '../utils/image_utils.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,6 +28,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final products = context.watch<ProductProvider>().products;
+    // 1번 상품만 메인에 표시
+    final mainProduct = products.where((p) => p.id == 'product_1').isNotEmpty
+        ? products.firstWhere((p) => p.id == 'product_1')
+        : (products.isNotEmpty ? products.first : null);
 
     return SafeArea(
       child: Padding(
@@ -114,19 +119,20 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               // 로그아웃 버튼
               PopupMenuButton<String>(
+                tooltip: '전환',
                 onSelected: (value) {
-                  if (value == 'logout') {
-                    Provider.of<AuthProvider>(context, listen: false).logout();
+                  if (value == 'change') {
+                    Navigator.pushNamed(context, '/login');
                   }
                 },
                 itemBuilder: (BuildContext context) => [
                   const PopupMenuItem<String>(
-                    value: 'logout',
+                    value: 'change',
                     child: Row(
                       children: [
-                        Icon(Icons.logout),
+                        Icon(Icons.person, color: Colors.red),
                         SizedBox(width: 8),
-                        Text('로그아웃'),
+                        Text('전환', style: TextStyle(color: Colors.red)),
                       ],
                     ),
                   ),
@@ -141,116 +147,139 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? const Center(child: Text('상품이 없습니다.'))
                   : CustomScrollView(
                       slivers: [
-                        // 최근 상품 영역 (메인 상품 이미지)
-                        SliverToBoxAdapter(
-                          //스크롤이 되기 위해서 작성해야함
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: GestureDetector(
-                              onTap: () => selectProduct(products.first),
-                              child: AspectRatio(
-                                aspectRatio: 1.0,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withAlpha(30),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-
-                                  // 메인 사진 위에 글자들을 스텍으로 쌓음
-                                  child: Stack(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: Image.network(
-                                          products.first.imageUrl,
-                                          width: double.infinity,
-                                          height: double.infinity,
-                                          fit: BoxFit.cover,
+                        // 메인 상품 영역 (1번 상품만)
+                        if (mainProduct != null)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: GestureDetector(
+                                onTap: () => selectProduct(mainProduct),
+                                child: AspectRatio(
+                                  aspectRatio: 1.0,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withAlpha(30),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
                                         ),
-                                      ),
-                                      Container(
-                                        decoration: BoxDecoration(
+                                      ],
+                                    ),
+                                    // 메인 사진 위에 글자들을 스텍으로 쌓음
+                                    child: Stack(
+                                      children: [
+                                        ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(12),
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topCenter,
-                                            end: Alignment.bottomCenter,
-                                            colors: [
-                                              Colors.transparent,
-                                              Colors.black.withAlpha(30),
+                                          child: SizedBox(
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            child: ImageUtils.buildImage(
+                                              mainProduct.imageUrl,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topCenter,
+                                              end: Alignment.bottomCenter,
+                                              colors: [
+                                                Colors.transparent,
+                                                Colors.black.withAlpha(30),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          left: 16,
+                                          bottom: 16,
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              // 50% 세일 배지
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 12,
+                                                        vertical: 6),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.red,
+                                                  borderRadius:
+                                                      BorderRadius.circular(16),
+                                                ),
+                                                child: const Text(
+                                                  '50% SALE',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                mainProduct.name,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  shadows: [
+                                                    Shadow(
+                                                      offset: Offset(1, 1),
+                                                      blurRadius: 3,
+                                                      color: Colors.black54,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                mainProduct.description,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 14,
+                                                  shadows: [
+                                                    Shadow(
+                                                      offset: Offset(1, 1),
+                                                      blurRadius: 3,
+                                                      color: Colors.black54,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                '${NumberFormat('#,###').format(mainProduct.price)}원',
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                  shadows: [
+                                                    Shadow(
+                                                      offset: Offset(1, 1),
+                                                      blurRadius: 3,
+                                                      color: Colors.black54,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
                                             ],
                                           ),
                                         ),
-                                      ),
-                                      Positioned(
-                                        left: 16,
-                                        bottom: 16,
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              products.first.name,
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                                shadows: [
-                                                  Shadow(
-                                                    offset: Offset(1, 1),
-                                                    blurRadius: 3,
-                                                    color: Colors.black54,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              products.first.description,
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14,
-                                                shadows: [
-                                                  Shadow(
-                                                    offset: Offset(1, 1),
-                                                    blurRadius: 3,
-                                                    color: Colors.black54,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              '${NumberFormat('#,###').format(products.first.price)}원',
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600,
-                                                shadows: [
-                                                  Shadow(
-                                                    offset: Offset(1, 1),
-                                                    blurRadius: 3,
-                                                    color: Colors.black54,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
 
                         // 상품 목록
                         SliverList(
@@ -279,18 +308,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
             ),
           ]),
-          floatingActionButton: SizedBox(
-            // 버튼 사이즈 키움
-            width: 60,
-            height: 60,
-            child: FloatingActionButton(
-              onPressed: () => Navigator.pushNamed(context, '/addProduct'),
-              child: const Icon(
-                Icons.add,
-                size: 40,
-              ),
-            ),
-          ),
         ),
       ),
     );

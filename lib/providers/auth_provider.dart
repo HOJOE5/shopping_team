@@ -26,25 +26,22 @@ class AuthProvider with ChangeNotifier {
   // 미리 정의된 사용자 계정 (실제 앱에서는 서버에서 관리)
   final Map<String, Map<String, dynamic>> _users = {
     'admin': {
-      'password': 'admin123',
       'name': '관리자',
       'type': UserType.admin,
     },
     'customer': {
-      'password': 'customer123',
       'name': '고객',
       'type': UserType.customer,
     },
   };
 
-  Future<bool> login(String username, String password) async {
+  Future<bool> login(String userType) async {
     // 실제 앱에서는 서버 API 호출
-    if (_users.containsKey(username) &&
-        _users[username]!['password'] == password) {
+    if (_users.containsKey(userType)) {
       _currentUser = User(
-        id: username,
-        name: _users[username]!['name'],
-        type: _users[username]!['type'],
+        id: userType,
+        name: _users[userType]!['name'],
+        type: _users[userType]!['type'],
       );
       _isLoggedIn = true;
       notifyListeners();

@@ -4,6 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import '../models/product.dart';
 import '../providers/product_provider.dart';
 import '../providers/auth_provider.dart';
+import '../utils/image_utils.dart';
 
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({super.key});
@@ -233,11 +234,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       child: imageUrl != null
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(10),
-                              child: Image.network(
-                                imageUrl!,
+                              child: SizedBox(
                                 width: double.infinity,
                                 height: double.infinity,
-                                fit: BoxFit.cover,
+                                child: ImageUtils.buildImage(
+                                  imageUrl!,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                             )
                           : const Center(
