@@ -6,6 +6,7 @@ import '../models/product.dart';
 import '../widgets/product_card.dart';
 import '../providers/product_provider.dart';
 import '../providers/cart_provider.dart';
+import '../providers/auth_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -32,8 +33,51 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.symmetric(vertical: 5),
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('Lovely Shop'),
+            title: Consumer<AuthProvider>(
+              builder: (context, authProvider, child) {
+                return Row(
+                  children: [
+                    const Text('Lovely Shop'),
+                    const SizedBox(width: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: authProvider.isAdmin
+                            ? Colors.red[100]
+                            : Colors.blue[100],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        authProvider.isAdmin ? '관리자' : '고객',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: authProvider.isAdmin
+                              ? Colors.red[700]
+                              : Colors.blue[700],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
             actions: [
+              // 관리자만 상품 등록 버튼 표시
+              Consumer<AuthProvider>(
+                builder: (context, authProvider, child) {
+                  if (authProvider.isAdmin) {
+                    return IconButton(
+                      icon: const Icon(Icons.add),
+                      tooltip: '상품 등록',
+                      onPressed: () =>
+                          Navigator.pushNamed(context, '/addProduct'),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
               Consumer<CartProvider>(
                 builder: (ctx, cart, child) => Stack(
                   children: [
@@ -68,6 +112,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
+              // 로그아웃 버튼
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'logout') {
+                    Provider.of<AuthProvider>(context, listen: false).logout();
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                  const PopupMenuItem<String>(
+                    value: 'logout',
+                    child: Row(
+                      children: [
+                        Icon(Icons.logout),
+                        SizedBox(width: 8),
+                        Text('로그아웃'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
           body: Column(children: [
@@ -77,8 +141,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? const Center(child: Text('상품이 없습니다.'))
                   : CustomScrollView(
                       slivers: [
-                        // 최근 상품 영역
+                        // 최근 상품 영역 (메인 상품 이미지)
                         SliverToBoxAdapter(
+                          //스크롤이 되기 위해서 작성해야함
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: GestureDetector(
@@ -96,6 +161,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                     ],
                                   ),
+
+                                  // 메인 사진 위에 글자들을 스텍으로 쌓음
                                   child: Stack(
                                     children: [
                                       ClipRRect(
@@ -189,14 +256,20 @@ class _HomeScreenState extends State<HomeScreen> {
                         SliverList(
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
-                              return ProductCard(
-                                product: products[index],
-                                onTap: () => selectProduct(products[index]),
-                                onEdit: () => Navigator.pushNamed(
-                                  context,
-                                  '/addProduct',
-                                  arguments: products[index],
-                                ),
+                              return Consumer<AuthProvider>(
+                                builder: (context, authProvider, child) {
+                                  return ProductCard(
+                                    product: products[index],
+                                    onTap: () => selectProduct(products[index]),
+                                    onEdit: authProvider.isAdmin
+                                        ? () => Navigator.pushNamed(
+                                              context,
+                                              '/addProduct',
+                                              arguments: products[index],
+                                            )
+                                        : null,
+                                  );
+                                },
                               );
                             },
                             childCount: products.length,
